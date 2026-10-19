@@ -867,9 +867,42 @@ function quickValues(get) {
   };
 }
 
+// Layer heights OrcaSlicer's own profiles offer for each nozzle size, for
+// printers whose brand ships no presets with heights.
+const NOZZLE_LAYERS = {
+  0.2: [0.06, 0.08, 0.1, 0.12, 0.14],
+  0.25: [0.06, 0.08, 0.1, 0.12, 0.14],
+  0.4: [0.08, 0.12, 0.16, 0.2, 0.24, 0.28],
+  0.5: [0.12, 0.16, 0.2, 0.24, 0.28, 0.32],
+  0.6: [0.18, 0.24, 0.3, 0.36, 0.42],
+  0.8: [0.24, 0.32, 0.4, 0.48, 0.56],
+  1: [0.3, 0.4, 0.5, 0.6, 0.7],
+};
+
+/** The layer heights for the selected printer: those of its own OrcaSlicer print profiles. */
+function layerChoices() {
+  const byName = new Map((state.vendor?.processes || []).map((p) => [p.name, parseFloat(p.layer)]));
+  let list = (state.printer?.processes || []).map((n) => byName.get(n)).filter((h) => h > 0);
+  if (!list.length) {
+    const nozzle = parseFloat(first(effectiveMachine().nozzle_diameter)) || 0.4;
+    const key = Object.keys(NOZZLE_LAYERS).map(Number).reduce((a, b) => (Math.abs(b - nozzle) < Math.abs(a - nozzle) ? b : a));
+    list = NOZZLE_LAYERS[key].map((h) => Math.round((h * nozzle) / key * 100) / 100);
+  }
+  // Inside the printer's own limits.
+  const m = effectiveMachine();
+  const lo = parseFloat(first(m.min_layer_height)) || 0, hi = parseFloat(first(m.max_layer_height)) || Infinity;
+  const kept = list.filter((h) => h >= lo - 1e-9 && h <= hi + 1e-9);
+  return [...new Set((kept.length ? kept : list).map((h) => +h.toFixed(3)))].sort((a, b) => a - b);
+}
+
 function fillQuick() {
   const v = quickValues(effective);
-  ui.qLayer.value = v.layer;
+  const heights = layerChoices();
+  const opts = heights.map((h) => option(String(h), h.toFixed(2)));
+  // A height set in the profile or Advanced settings that isn't one of these still shows.
+  if (!heights.some((h) => Math.abs(h - v.layer) < 1e-6)) opts.push(option(String(v.layer), `${v.layer} (custom)`));
+  ui.qLayer.replaceChildren(...opts.sort((a, b) => parseFloat(a.value) - parseFloat(b.value)));
+  ui.qLayer.value = [...ui.qLayer.options].find((o) => Math.abs(parseFloat(o.value) - v.layer) < 1e-6)?.value ?? '';
   ui.qInfill.value = v.infill;
   ui.qWalls.value = v.walls;
   ui.qSupport.value = v.support;
