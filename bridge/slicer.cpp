@@ -4448,16 +4448,44 @@ oneslicer_status_t oneslicer_project_export(
             uint8_t* exported_data = nullptr;
             uint32_t exported_len = 0;
             oneslicer_status_t export_status = ONESLICER_OK;
-            // Orca Web Slicer: every project goes through the native plate
-            // writer, with or without slice G-code, so models stay separate
-            // objects (with their own filaments, parts and paint) and each
-            // plate stays a plate. (The upstream portable path merged all
-            // models into one mesh and flattened the plates.)
-            export_status = write_project_slice_artifacts_3mf(
-                *session, manifest, gcode_by_plate, &exported_data, &exported_len, error
-            );
-            if (export_status != ONESLICER_OK && !error.empty())
-                record_error(*session, error);
+            // Orca Web Slicer: models always stay separate objects (with their
+            // own filaments, parts and paint) and plates stay plates. The
+            // upstream portable path merged every model into one mesh unless
+            // support modifiers were present, and flattened the plates.
+            if (options.include_slice_artifacts || manifest.plate_ids.size() > 1) {
+                // Native plates (and the current G-code, when asked for).
+                export_status = write_project_slice_artifacts_3mf(
+                    *session, manifest, gcode_by_plate, &exported_data, &exported_len, error
+                );
+                if (export_status != ONESLICER_OK && !error.empty())
+                    record_error(*session, error);
+            } else {
+                // One plate: upstream's native-model writer (the one it used
+                // for support modifiers), now for every single-plate project.
+                Slic3r::Model native_model;
+                for (const auto& plate_id : manifest.plate_ids) {
+                    export_status = build_project_plate_model(
+                        *session, manifest, plate_id, native_model, error
+                    );
+                    if (export_status != ONESLICER_OK) {
+                        record_error(*session, error);
+                        return export_status;
+                    }
+                }
+                if (native_model.objects.empty()) {
+                    record_error(*session, "project contains no objects to export");
+                    return ONESLICER_ERR_EMPTY_INPUT;
+                }
+                store_adaptive_layer_height_profiles(*session, native_model);
+                if (!manifest.modifier_volumes.empty()
+                    && !prepare_native_modifier_model_for_export(native_model, error)) {
+                    record_error(*session, error);
+                    return ONESLICER_ERR_VALIDATION;
+                }
+                export_status = write_project_model_3mf(
+                    *session, native_model, &exported_data, &exported_len
+                );
+            }
             if (export_status != ONESLICER_OK) {
                 std::free(exported_data);
                 return export_status;
