@@ -45,8 +45,10 @@ so U1 projects need OrcaSlicer on the workstation.
 - **Support enforcers and blockers:** select a model and add boxes that force
   supports, or keep them out, in that area. Set each box's position and size
   in millimetres.
-- **Quick settings:** layer height, infill, walls, supports (off/normal/tree),
-  brim and build-plate type.
+- **Quick settings:** the print profile sets the layer height (as in desktop
+  OrcaSlicer, e.g. "0.12mm Fine"); beside it are adaptive layers, infill,
+  walls, supports (off/normal/tree), brim and build-plate type. Any other
+  layer height can be set in Advanced settings.
 - **Advanced settings:** all of OrcaSlicer's Print, Filament and Printer
   settings, with the same pages, names and help text as the desktop app, plus
   search. Changed settings are shown in bold and can be reset one at a time.

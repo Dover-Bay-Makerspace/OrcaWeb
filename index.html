@@ -60,9 +60,16 @@
 
       <section class="panel">
         <h2>Print settings</h2>
-        <label class="field"><span>Profile</span><select id="processSelect"></select></label>
+        <label class="field" title="Sets the layer height and the speeds and other settings that go with it"><span>Profile (layer height)</span><select id="processSelect"></select></label>
         <div class="quick">
-          <label class="field"><span>Layer height (mm)</span><select id="qLayer" title="The layer heights OrcaSlicer's profiles use for this printer and nozzle"></select></label>
+          <label class="field" title="Adaptive layers use thinner layers where the model curves and thicker ones where it is straight, like OrcaSlicer's Adaptive layer height"><span>Layers</span>
+            <select id="qAdaptive">
+              <option value="">Same height</option>
+              <option value="0.2">Adaptive: finer</option>
+              <option value="0.5">Adaptive: balanced</option>
+              <option value="0.8">Adaptive: faster</option>
+            </select>
+          </label>
           <label class="field"><span>Infill (%)</span><input id="qInfill" type="number" min="0" max="100" step="5"></label>
           <label class="field"><span>Walls</span><input id="qWalls" type="number" min="1" max="20" step="1"></label>
           <label class="field"><span>Supports</span>
@@ -77,14 +84,6 @@
               <option value="auto_brim">Auto</option>
               <option value="no_brim">Off</option>
               <option value="outer_only">On (outside only)</option>
-            </select>
-          </label>
-          <label class="field" title="Adaptive layers use thinner layers where the model curves and thicker ones where it is straight, like OrcaSlicer's Adaptive layer height"><span>Layers</span>
-            <select id="qAdaptive">
-              <option value="">Same height</option>
-              <option value="0.2">Adaptive: finer</option>
-              <option value="0.5">Adaptive: balanced</option>
-              <option value="0.8">Adaptive: faster</option>
             </select>
           </label>
         </div>

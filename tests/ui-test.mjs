@@ -178,17 +178,18 @@ try {
   await page.keyboard.press('Escape');
 
   // ---- quick settings + Advanced editor
-  const heights = await page.$$eval('#qLayer option', (o) => o.map((x) => x.textContent));
-  check('layer height offers the profile heights for this nozzle', heights.length >= 3 && heights.every((h) => /^0\.\d\d$/.test(h)) && heights.join() === '0.05,0.07,0.10,0.15,0.20,0.30', heights.join(', '));
-  await page.selectOption('#qLayer', '0.3');
+  check('layer height comes from the profile (no separate box)', !(await page.$('#qLayer'))
+    && /layer height/i.test(await page.$eval('label:has(#processSelect) span', (e) => e.textContent)));
   await page.selectOption('#qSupport', 'tree');
   await page.selectOption('#bedTypeSelect', 'High Temp Plate');
-  check('quick changes counted on Advanced button', /3 changed/.test(await page.$eval('#advCount', (e) => e.textContent)), await page.$eval('#advCount', (e) => e.textContent));
+  check('quick changes counted on Advanced button', /2 changed/.test(await page.$eval('#advCount', (e) => e.textContent)), await page.$eval('#advCount', (e) => e.textContent));
   await page.click('#advBtn');
   await page.waitForSelector('#advPanel:not([hidden])');
   check('Advanced settings shows OrcaSlicer pages', (await page.$$eval('.adv-page', (b) => b.map((x) => x.textContent))).join(',').startsWith('Quality'));
+  await page.fill('#adv-layer_height', '0.3');
+  await page.dispatchEvent('#adv-layer_height', 'change');
   const layerRow = await page.$eval('#adv-layer_height', (i) => [i.value, i.closest('.adv-row').classList.contains('changed')]);
-  check('quick change shows in the editor as changed', layerRow[0] === '0.3' && layerRow[1], JSON.stringify(layerRow));
+  check('layer height can still be changed in Advanced settings', layerRow[0] === '0.3' && layerRow[1], JSON.stringify(layerRow));
   await page.selectOption('#adv-seam_position', 'back');
   await page.fill('.adv-search', 'ironing type');
   await page.waitForTimeout(100);
@@ -271,7 +272,7 @@ try {
     && (await page.$eval('#vendorSelect', (s) => s.value)) === 'Prusa');
   check('project restored setting changes', /settings? from the project differ/.test(opened) && /changed/.test(await page.$eval('#advCount', (e) => e.textContent)),
     await page.$eval('#advCount', (e) => e.textContent));
-  check('quick settings show project values', (await page.$eval('#qLayer', (i) => i.value)) === '0.3' && (await page.$eval('#qSupport', (i) => i.value)) === 'tree');
+  check('quick settings show project values', (await page.$eval('#qSupport', (i) => i.value)) === 'tree');
   await page.click('#sliceAllBtn');
   await page.waitForFunction(() => [...document.querySelectorAll('.plate-chip .chip-meta')].every((e) => e.textContent.includes('✓')), null, { timeout: 30000 });
   const [zip2] = await Promise.all([page.waitForEvent('download'), page.click('#downloadAllBtn')]);
