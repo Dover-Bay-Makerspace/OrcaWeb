@@ -1,54 +1,50 @@
 # Third-party notices
 
-## one-slicer-api glue
+## OrcaSlicer (slicing engine and printer/filament/process profiles)
 
-`wasm/oneslicer/oneslicer-emscripten-glue.js` and
-`wasm/oneslicer/oneslicer-conformance.mjs` are copied unmodified from the
-one-slicer-api 0.7.0 release. The glue is linked into `slicer-mt.js`.
+- https://github.com/OrcaSlicer/OrcaSlicer — v2.4.2
+- License: GNU Affero General Public License v3.0 (see `LICENSE`)
+- Copyright: SoftFever and OrcaSlicer contributors. OrcaSlicer is a fork of
+  Bambu Studio, which is a fork of PrusaSlicer (also AGPL-3.0).
+- The files in `profiles/` are OrcaSlicer's own preset files, copied unchanged
+  apart from minification and an added `_parent` link.
 
-- License: Apache License 2.0
-- Copyright: one-slicer-api contributors
+## OrcaWeb WebAssembly engine (`engine/slicer-mt.js`, `engine/slicer-mt.wasm`)
 
-## OrcaSlicer
+- https://github.com/Hiosdra/OrcaWeb — Emscripten build of OrcaSlicer.
+  Complete corresponding source, patches and build scripts are in that
+  repository. The engine also contains OCCT (Open CASCADE Technology Public
+  License), oneTBB (Apache-2.0), libnoise (LGPL-2.1) and the one-slicer-api
+  glue (Apache-2.0); see that repository's NOTICE.md.
 
-This repository embeds a WebAssembly build of
-[OrcaSlicer](https://github.com/SoftFever/OrcaSlicer).
+## three.js (`vendor/three/`)
 
-- License: GNU Affero General Public License v3.0 (AGPL-3.0)
-- Copyright: SoftFever and OrcaSlicer contributors
-- Source version: https://github.com/SoftFever/OrcaSlicer/tree/v2.4.2
-- Compatibility changes: [`patches/apply.py`](patches/apply.py)
+- https://github.com/mrdoob/three.js — r186, MIT License (`vendor/three/LICENSE`)
 
-Per AGPL-3.0 §13, the complete corresponding source for this modified build,
-including the patches, is available in this repository.
+## coi-serviceworker (`coi-serviceworker.min.js`)
 
-## PrusaSlicer / libslic3r
+- https://github.com/gzuidhof/coi-serviceworker — MIT License
+  (`vendor/coi-serviceworker.LICENSE`)
 
-OrcaSlicer is a fork of
-[PrusaSlicer](https://github.com/prusa3d/PrusaSlicer), also licensed under
-AGPL-3.0.
+## csg.js (algorithm in `workers/parts-worker.js`)
 
-## OCCT (Open CASCADE Technology)
+- https://github.com/evanw/csg.js — Copyright (c) 2011 Evan Wallace, MIT License.
+  The BSP-tree solid boolean used to cut overlapping colour parts follows its
+  algorithm (rewritten here without recursion).
 
-OCCT 7.8.1 is compiled into the engine for STEP import:
-https://github.com/Open-Cascade-SAS/OCCT
+## Fonts for the Text tool (`vendor/fonts/`)
 
-- License: Open CASCADE Technology Public License (modified LGPL-2.1 with a
-  static-linking exception)
-- Copyright: Open Cascade SAS and OCCT contributors
+Outline files made with `tools/build-fonts.py` (characters subset, outlines unchanged):
 
-## oneTBB
+- Poppins Bold: Copyright 2020 The Poppins Project Authors, SIL Open Font
+  License 1.1 (`vendor/fonts/LICENSE-OFL.txt`).
+- DejaVu Sans Bold, DejaVu Sans Condensed Bold, DejaVu Serif Bold: Bitstream
+  Vera licence with DejaVu changes in the public domain
+  (`vendor/fonts/LICENSE-DejaVu.txt`).
 
-The engine links [oneTBB](https://github.com/uxlfoundation/oneTBB) v2021.13.2,
-built from source for `wasm32-emscripten` with pthread support.
+## This site
 
-- License: Apache License 2.0
-- Copyright: Intel Corporation and oneTBB contributors
-
-## libnoise
-
-libnoise is compiled into the engine for the FuzzySkin feature:
-https://github.com/amitsharma/libnoise
-
-- License: GNU Lesser General Public License v2.1 (LGPL-2.1)
-- Copyright: Jason Bevins and libnoise contributors
+The web interface (HTML/CSS/JS, tools and workflow) is released under the
+AGPL-3.0 to match OrcaSlicer. If you run a modified copy for other people, the
+AGPL requires you to offer them its source; the GitHub workflow sets the About
+box link to your repository automatically.
